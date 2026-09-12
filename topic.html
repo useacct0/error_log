@@ -20,6 +20,13 @@
 				<a id="a_addp" href="./add_problems.html?topic="><button id="addproblems" class="btn">Add Problems</button></a>
 				<button id="load_p" class="btn">Load Folder</button>
 			</div>
+			<div class="filter-container" style="margin: 15px 10px;">
+				<form id="filter">
+					<label>Filter by tags:  </label>
+					<input type="text" placeholder="Tags" id="tags"/>
+					<button id="filterbtn" type="submit">Filter</button>
+				</form>
+			</div>
 		</header>
 		<main>
 			<div id="image-container"></div>
@@ -52,7 +59,8 @@
 							foundmatch = true;
 							
 							const rel = entry.name.split("_")[2];
-							const solTarget = `solution_${document.getElementById('topicname').innerText}_${rel}`;
+							const tags = entry.name.split("_")[3];
+							const solTarget = `solution_${document.getElementById('topicname').innerText}_${rel}_${tags}`;
 							let solUrl = "";
 							
 							for await (const entrySol of directoryHandle.values()){
@@ -70,6 +78,7 @@
 							
 							const probContainer = document.createElement('div');
 							probContainer.classList.add('prob-container');
+							probContainer.id = entry.name+'container';
 							probContainer.innerHTML = "<h3>Problem: </h3>";
 							img_container.appendChild(probContainer);
 							
@@ -85,7 +94,6 @@
 							checkAnswerBtn.innerText = "Check Answer";
 							checkAnswerBtn.classList.add('btn');
 							checkAnswerBtn.classList.add('check-answer-btn');
-							<!-- const rel = entry.name.split("_")[2]; -->
 							checkAnswerBtn.id = entry.name;
 							probContainer.appendChild(checkAnswerBtn);
 							
@@ -103,7 +111,7 @@
 					}
 				}
 				if (!foundmatch) {
-					img_container.innerHTML = `No problems added to ${topic}`;
+					alert(`No problems added to ${topic}`);
 				}
 			} catch (error) {
 				console.error("Folder selection failed.", error);
@@ -122,6 +130,43 @@
 					targetImg.style.display = "none";
 				};
 			};
+		});
+		
+		document.addEventListener('click', async (event) => {
+			if (event.target.id == "filterbtn") {
+				try {
+					event.preventDefault();
+					const topic = document.getElementById('topicname').innerText;
+					const req_tags = document.getElementById('tags').value.split(" ");
+					
+					const directoryHandle = await window.showDirectoryPicker();
+					let foundmatch = false;
+					for await (const entry of directoryHandle.values()){
+						if (entry.kind === "file"){
+							const targetPrefix = `problem_${topic}_`;
+						
+							if (entry.name.startsWith(targetPrefix)){
+								foundmatch = true;
+								let accept = false;
+								const rel = entry.name.split("_")[2];
+								const tags = entry.name.split("_")[3];
+								
+							
+								for await (const tag of req_tags){
+									accept = tags.includes(tag);
+								}
+							
+								if (!accept){
+									const probContainer = document.getElementById(entry.name+'container');
+									probContainer.style.display = "none";
+								}
+							}
+						}
+					}
+				} catch (error) {
+					console.error("Error filtering files", error);
+				};
+			}
 		});
 	</script>
 </html>

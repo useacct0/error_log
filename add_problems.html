@@ -35,6 +35,10 @@
 					<input type="text" class="form-input" id="rel" placeholder="Write a unique term that relates the files"/>
 				</div>
 				<div class='form-section'>
+					<label class='form-label'>Tags</label>
+					<input type="text" class="form-input" id="tags" placeholder="Split tags by spaces."/>
+				</div>
+				<div class='form-section'>
 					<button id="selectFolder" class="btn" type="button">Select Folder</button>
 				</div>
 				<div class='form-section'>
@@ -48,7 +52,6 @@
 		const urlParams = new URLSearchParams(window.location.search);
 		const topic = urlParams.get('topic');
 		document.getElementById('topic').innerText = topic; 
-		<!-- console.log(document.getElementById("selectFolder").innerHTML) -->
 		});
 		
 		let directoryHandle;
@@ -77,12 +80,13 @@
 			}
 			try {
 				const rel = document.getElementById("rel").value;
-				const fileHandle1 = await directoryHandle.getFileHandle("problem_"+document.getElementById('topic').innerText+"_"+rel, {create: true});
+				const tags = document.getElementById("tags").value;
+				const fileHandle1 = await directoryHandle.getFileHandle("problem_"+document.getElementById('topic').innerText+"_"+rel+"_"+tags, {create: true});
 				const writable1 = await fileHandle1.createWritable();
 				await writable1.write(problem_image);
 				await writable1.close();
 				
-				const fileHandle2 = await directoryHandle.getFileHandle("solution_"+document.getElementById('topic').innerText+"_"+rel, {create: true});
+				const fileHandle2 = await directoryHandle.getFileHandle("solution_"+document.getElementById('topic').innerText+"_"+rel+"_"+tags, {create: true});
 				const writable2 = await fileHandle2.createWritable();
 				await writable2.write(sol_image);
 				await writable2.close();
