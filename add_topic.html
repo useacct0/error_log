@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		
+		<title>Add Topic | Error Log</title>
+		<link rel="stylesheet" href="style.css">
+	</head>
+	<body>
+		<header>
+			<nav class="navbar">
+				<ul>
+					<a href="./index.html"<li>Error Log</li></a>
+					<a href="./add_topic.html"<li>Add Topic</li></a>
+				</ul>
+			</nav>
+			<h1 class="heading">Add Topic</h1>
+			<form id="add_topic">
+				<div class="form-section">
+					<label class="form-label">Topic Name</label>
+					<input class="form-input" id="name" type="text" placeholder="Enter the topic"/>
+				</div>
+				<div class="form-section">
+					<label class="form-label">Subject</label>
+					<input class="form-input" id="subject" type="text" placeholder="Enter subject"/>
+				</div>
+				<div class="form-section">
+					<button class="btn" type="submit">Add Topic</button>
+				</div>
+			</form>
+		</header>
+	<body>
+	<script>
+		const form  = document.getElementById("add_topic");
+		form.addEventListener("submit", function(event) {
+			event.preventDefault();
+			
+			const name = document.getElementById("name").value;
+			const subject = document.getElementById("subject").value;
+			
+			const topic = {'topicname': name, 'subject': subject};
+			localStorage.setItem(topic['topicname'], topic['subject']); 
+			
+			form.reset();
+			<!-- alert('Data stored!'); -->
+		});
+	</script>
+</html>

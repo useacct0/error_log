@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		
+		<title></title>
+		<link rel="stylesheet" href="style.css">
+	</head>
+	<body>
+		<header>
+			<nav class="navbar">
+				<ul>
+					<a href="./index.html"<li>Error Log</li></a>
+					<a href="./add_topic.html"<li>Add Topic</li></a>
+				</ul>
+			</nav>
+			<h1 class="heading" id="topicname"></h1>
+			<div class="buttons" id="buttons">
+				<a id="a_addp" href="./add_problems.html?topic="><button id="addproblems" class="btn">Add Problems</button></a>
+				<button id="load_p" class="btn">Load Folder</button>
+			</div>
+		</header>
+		<main>
+			<div id="image-container"></div>
+		</main>
+	</body>
+	<script>
+		window.addEventListener('load', (event) => {
+			const urlParams = new URLSearchParams(window.location.search);
+			const topic = urlParams.get('topic');
+			document.title = topic;
+			document.getElementById('topicname').innerText = topic;
+			document.getElementById('a_addp').href = `./add_problems.html?topic=${topic}`;
+		});
+		
+		const load_p = document.getElementById("load_p");
+		const img_container = document.getElementById("image-container");
+		load_p.addEventListener('click', async () => {
+			try {
+				const directoryHandle = await window.showDirectoryPicker();
+				img_container.innerHTML = "<em>Scanning Folder...</em>";
+				
+				let foundmatch = false;
+				img_container.innerHTML = "";
+				
+				for await (const entry of directoryHandle.values()){
+					if (entry.kind === "file"){
+						const targetPrefix = `problem_${document.getElementById('topicname').innerText}_`;
+						
+						if (entry.name.startsWith(targetPrefix)){
+							foundmatch = true;
+							
+							const rel = entry.name.split("_")[2];
+							const solTarget = `solution_${document.getElementById('topicname').innerText}_${rel}`;
+							let solUrl = "";
+							
+							for await (const entrySol of directoryHandle.values()){
+								if (entrySol.kind === "file"){
+									if (entrySol.name == solTarget) {
+										const solution = await entrySol.getFile();
+										solUrl = URL.createObjectURL(solution);
+										break;
+									};
+								};
+							};	
+									
+							const file = await entry.getFile();
+							const imageUrl = URL.createObjectURL(file);
+							
+							const probContainer = document.createElement('div');
+							probContainer.classList.add('prob-container');
+							probContainer.innerHTML = "<h3>Problem: </h3>";
+							img_container.appendChild(probContainer);
+							
+							const imgElement = document.createElement('img');
+							imgElement.classList.add('prob-img');
+							imgElement.src = imageUrl;
+							imgElement.style.maxWidth = '300px';
+							imgElement.title = entry.name;
+							
+							probContainer.appendChild(imgElement);
+							
+							const checkAnswerBtn = document.createElement('button');
+							checkAnswerBtn.innerText = "Check Answer";
+							checkAnswerBtn.classList.add('btn');
+							checkAnswerBtn.classList.add('check-answer-btn');
+							<!-- const rel = entry.name.split("_")[2]; -->
+							checkAnswerBtn.id = entry.name;
+							probContainer.appendChild(checkAnswerBtn);
+							
+							const solImg = document.createElement('img');
+							solImg.classList.add('sol-img');
+							solImg.id = entry.name+"sol";
+							solImg.src = solUrl;
+							solImg.style.maxWidth = '300px';
+							solImg.title = entry.name+"solution";
+							solImg.style.display = "none";
+							probContainer.appendChild(solImg);
+		
+							
+						}
+					}
+				}
+				if (!foundmatch) {
+					img_container.innerHTML = `No problems added to ${topic}`;
+				}
+			} catch (error) {
+				console.error("Folder selection failed.", error);
+			}
+		});
+		
+		
+		document.addEventListener('click', async (event) => {
+			if (event.target.classList.contains('check-answer-btn')){
+				const Target = event.target.id+"sol";
+				const targetImg = document.getElementById(Target);
+				if (targetImg.style.display == "none"){
+					targetImg.style.display = "block";
+				}
+				else {
+					targetImg.style.display = "none";
+				};
+			};
+		});
+	</script>
+</html>

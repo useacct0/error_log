@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		
+		<title>Error Log</title>
+		<link rel="stylesheet" href="style.css">
+	</head>
+	<body>
+		<header>
+			<nav class="navbar">
+				<ul>
+					<a href="./index.html"<li>Error Log</li></a>
+					<a href="./add_topic.html"<li>Add Topic</li></a>
+				</ul>
+			</nav>
+			<h1 class="heading" id="heading">Error Log</h1>
+			<div class="buttons">
+				<a href='./add_topic.html'><button class="btn">Add Topic</button></a>
+				<a href='./problem_sets.html'><button class="btn">Problem Sets</button></a>
+			</div>
+		</header>
+		<main>
+			<div id="topics"></div>
+		</main>
+	</body>
+	<script>
+		const table = document.getElementById("topics");
+		const topics = { ...localStorage };
+		
+		window.addEventListener('load', (event) => {
+			event.preventDefault();
+			let keys = Object.keys(localStorage);
+			for (let i=0; i<keys.length; i++) {
+				<!-- We have all key values from localStorage here  -->
+				let key = keys[i];
+				let value = localStorage.getItem(key);
+				<!-- We add topics to frontend here -->
+				let topic = document.createElement("div");
+				topic.classList.add("topic");
+				topic.innerHTML = "<h2>"+key+"</h2><br>"+value+"<button id='"+key+"' class='btn opentopic'>Open Topic</btn>";
+				table.appendChild(topic);
+			};
+		});
+		
+		
+		document.addEventListener('click', (event) => {
+			if (event.target.classList.contains('opentopic')){
+				window.location = "./topic.html?topic="+event.target.id;
+			};
+		})
+	</script>
+</html>

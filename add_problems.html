@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		
+		<title>Add Problems</title>
+		<link rel="stylesheet" href="style.css">
+	</head>
+	<body>
+		<header>
+			<nav class="navbar">
+				<ul>
+					<a href="./index.html"<li>Error Log</li></a>
+					<a href="./add_topic.html"<li>Add Topic</li></a>
+				</ul>
+			</nav>
+			<h1 class="heading" id="heading">Add Problems</h1>
+			<div class="buttons">
+				<p id='topic'></p>
+			</div>
+		</header>
+		<main>
+			<form id='problem-form'>
+				<div class='form-section'>
+					<label class='form-label'>Add Problem</label>
+					<input type="file" id="problem" accept="image/*"/>
+				</div>
+				<div class='form-section'>
+					<label class='form-label'>Add Solution</label>
+					<input type="file" id="solution" accept="image/*"/>
+				</div>
+				<div class='form-section'>
+					<label class='form-label'>Relation Term</label>
+					<input type="text" class="form-input" id="rel" placeholder="Write a unique term that relates the files"/>
+				</div>
+				<div class='form-section'>
+					<button id="selectFolder" class="btn" type="button">Select Folder</button>
+				</div>
+				<div class='form-section'>
+					<button id="addproblembtn" class="btn" type="submit">Add Problem</button>
+				</div>
+			</form>
+		</main>
+	</body>
+	<script>
+		window.addEventListener('load', (event) => {
+		const urlParams = new URLSearchParams(window.location.search);
+		const topic = urlParams.get('topic');
+		document.getElementById('topic').innerText = topic; 
+		<!-- console.log(document.getElementById("selectFolder").innerHTML) -->
+		});
+		
+		let directoryHandle;
+		document.getElementById("selectFolder").addEventListener('click', async () => {
+			try {
+				directoryHandle = await window.showDirectoryPicker();
+			} catch (error) {
+				console.error("Error picking the folder");
+			};
+		});
+		
+		const form = document.getElementById("problem-form");
+		form.addEventListener("submit", async (event) => {
+			event.preventDefault();
+			if (!directoryHandle){
+				alert("Please select a folder first!");
+				return;
+			};
+			
+			let problem_image = document.getElementById("problem").files[0];
+			let sol_image = document.getElementById("solution").files[0];
+				
+			if (!problem_image || !sol_image){
+				alert("Please upload both images! Or add the relation term.");
+				return;
+			}
+			try {
+				const rel = document.getElementById("rel").value;
+				const fileHandle1 = await directoryHandle.getFileHandle("problem_"+document.getElementById('topic').innerText+"_"+rel, {create: true});
+				const writable1 = await fileHandle1.createWritable();
+				await writable1.write(problem_image);
+				await writable1.close();
+				
+				const fileHandle2 = await directoryHandle.getFileHandle("solution_"+document.getElementById('topic').innerText+"_"+rel, {create: true});
+				const writable2 = await fileHandle2.createWritable();
+				await writable2.write(sol_image);
+				await writable2.close();
+				
+				alert("Saved!");
+			} catch (error){
+				alert("Error saving files!");
+				console.error("Error saving the files!", error);
+			}
+			
+			form.reset();
+		});
+	<!-- </script> -->
+</html>
