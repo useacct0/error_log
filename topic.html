@@ -31,7 +31,9 @@
 		<main>
 			<div id="image-container"></div>
 		</main>
+		<footer>&copy; 2026 Divyansh Sharma. All rights reserved.</footer>
 	</body>
+	<script src='indexedDBhelper.js'></script>
 	<script>
 		window.addEventListener('load', (event) => {
 			const urlParams = new URLSearchParams(window.location.search);
@@ -41,11 +43,20 @@
 			document.getElementById('a_addp').href = `./add_problems.html?topic=${topic}`;
 		});
 		
+		let directoryHandle;
 		const load_p = document.getElementById("load_p");
 		const img_container = document.getElementById("image-container");
 		load_p.addEventListener('click', async () => {
 			try {
-				const directoryHandle = await window.showDirectoryPicker();
+				directoryHandle = await getDirHandle();
+				
+				const options = {mode: 'read'};
+				if ((await directoryHandle.queryPermission(options)) !== 'granted'){
+					if ((await directoryHandle.requestPermission(options)) !== 'granted'){
+						console.error("Permission denied by user");
+						return;
+					}
+				}
 				img_container.innerHTML = "<em>Scanning Folder...</em>";
 				
 				let foundmatch = false;
@@ -89,6 +100,10 @@
 							imgElement.title = entry.name;
 							
 							probContainer.appendChild(imgElement);
+							
+							const tagElement = document.createElement('p');
+							tagElement.innerText = "Tags: "+tags;
+							probContainer.appendChild(tagElement);
 							
 							const checkAnswerBtn = document.createElement('button');
 							checkAnswerBtn.innerText = "Check Answer";
@@ -137,29 +152,26 @@
 				try {
 					event.preventDefault();
 					const topic = document.getElementById('topicname').innerText;
-					const req_tags = document.getElementById('tags').value.split(" ");
+					const req_tags = document.getElementById('tags').value.trim().split(/\s+/);
 					
-					const directoryHandle = await window.showDirectoryPicker();
-					let foundmatch = false;
+					let foundmatch = false; 
 					for await (const entry of directoryHandle.values()){
 						if (entry.kind === "file"){
 							const targetPrefix = `problem_${topic}_`;
 						
 							if (entry.name.startsWith(targetPrefix)){
 								foundmatch = true;
-								let accept = false;
 								const rel = entry.name.split("_")[2];
 								const tags = entry.name.split("_")[3];
 								
+								let accept = req_tags.some(tag => tags.includes(tag));
 							
-								for await (const tag of req_tags){
-									accept = tags.includes(tag);
+								const probContainer = document.getElementById(entry.name+'container');
+								if (accept){
+									probContainer.style.display = "flex";
+									continue;
 								}
-							
-								if (!accept){
-									const probContainer = document.getElementById(entry.name+'container');
-									probContainer.style.display = "none";
-								}
+								probContainer.style.display = "none";
 							}
 						}
 					}

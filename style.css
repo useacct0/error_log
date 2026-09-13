@@ -82,7 +82,8 @@ a {
 #topics {
 	margin: 20px 10px;
 	display: grid;
-	grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+	grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+	gap: 20px;
 }
 
 .topic {
@@ -92,8 +93,9 @@ a {
 	display: flex;
 	flex-direction: column;
 	gap: 15px;
-	width: 20vw;
 	overflow-wrap: break-word;
+	max-width: 350px;
+	margin: 10px 10px;
 }
 
 .sub {
@@ -117,4 +119,15 @@ a {
 	display: flex;
 	flex-direction: column;
 	gap: 15px;
+	padding: 10px 10px;
+}
+
+footer {
+	position: sticky;
+	top: 100vh;
+	text-align: center;
+	font-size: 0.9rem;
+	color: #666;
+	width: 100%;
+	padding: 10px 0;
 }

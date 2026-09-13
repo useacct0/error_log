@@ -39,14 +39,13 @@
 					<input type="text" class="form-input" id="tags" placeholder="Split tags by spaces."/>
 				</div>
 				<div class='form-section'>
-					<button id="selectFolder" class="btn" type="button">Select Folder</button>
-				</div>
-				<div class='form-section'>
 					<button id="addproblembtn" class="btn" type="submit">Add Problem</button>
 				</div>
 			</form>
 		</main>
+		<footer>&copy; 2026 Divyansh Sharma. All rights reserved.</footer>
 	</body>
+	<script src='indexedDBhelper.js'></script>
 	<script>
 		window.addEventListener('load', (event) => {
 		const urlParams = new URLSearchParams(window.location.search);
@@ -55,19 +54,14 @@
 		});
 		
 		let directoryHandle;
-		document.getElementById("selectFolder").addEventListener('click', async () => {
-			try {
-				directoryHandle = await window.showDirectoryPicker();
-			} catch (error) {
-				console.error("Error picking the folder");
-			};
-		});
 		
 		const form = document.getElementById("problem-form");
 		form.addEventListener("submit", async (event) => {
 			event.preventDefault();
+			directoryHandle = await getDirHandle();
 			if (!directoryHandle){
 				alert("Please select a folder first!");
+				window.location = './index.html';
 				return;
 			};
 			
@@ -79,6 +73,15 @@
 				return;
 			}
 			try {
+			
+				const options = {mode: 'read'};
+				if ((await directoryHandle.queryPermission(options)) !== 'granted'){
+					if ((await directoryHandle.requestPermission(options)) !== 'granted'){
+						console.error("Permission denied by user");
+						return;
+					}
+				}
+				
 				const rel = document.getElementById("rel").value;
 				const tags = document.getElementById("tags").value;
 				const fileHandle1 = await directoryHandle.getFileHandle("problem_"+document.getElementById('topic').innerText+"_"+rel+"_"+tags, {create: true});
@@ -99,5 +102,5 @@
 			
 			form.reset();
 		});
-	<!-- </script> -->
+	</script>
 </html>

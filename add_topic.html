@@ -16,6 +16,8 @@
 				</ul>
 			</nav>
 			<h1 class="heading">Add Topic</h1>
+		</header>
+		<main>
 			<form id="add_topic">
 				<div class="form-section">
 					<label class="form-label">Topic Name</label>
@@ -29,20 +31,55 @@
 					<button class="btn" type="submit">Add Topic</button>
 				</div>
 			</form>
-		</header>
-	<body>
+		</main>
+		<footer>&copy; 2026 Divyansh Sharma. All rights reserved.</footer>
+	</body>
+	<script src="indexedDBhelper.js"></script>
 	<script>
 		const form  = document.getElementById("add_topic");
-		form.addEventListener("submit", function(event) {
+
+		
+		form.addEventListener("submit", async (event) => {
 			event.preventDefault();
-			
-			const name = document.getElementById("name").value;
-			const subject = document.getElementById("subject").value;
-			
-			const topic = {'topicname': name, 'subject': subject};
-			localStorage.setItem(topic['topicname'], topic['subject']); 
-			
-			form.reset();
+			try {
+				const directoryHandle = await getDirHandle();
+				<!-- directoryHandle = await window.showDirectoryPicker(); -->
+				
+				if (!directoryHandle){
+					alert("Please select a folder first!");
+					window.location = './index.html';
+					return;
+				};
+				
+				const name = document.getElementById("name").value;
+				const subject = document.getElementById("subject").value;
+				
+				if (!name || !subject){
+					alert("Please enter the topic details!");
+					return;
+				};
+				
+				const options = {mode: 'read'};
+				if ((await directoryHandle.queryPermission(options)) !== 'granted'){
+					if ((await directoryHandle.requestPermission(options)) !== 'granted'){
+						console.error("Permission denied by user");
+						return;
+					}
+				}
+				const textFileHandle = await directoryHandle.getFileHandle("topics.txt", {create: true});
+				const file = await textFileHandle.getFile();
+				const existingText = await file.text();
+				const textToAppend = String(name)+"_"+String(subject);
+				const updatedText = existingText ? `${existingText}\n${textToAppend}` : textToAppend;
+				
+				const writable = await textFileHandle.createWritable();
+				await writable.write(updatedText);
+				await writable.close();
+				
+				form.reset();
+			} catch (error) {
+				console.error("Error writing to file!", error);
+			}
 		});
 	</script>
 </html>
