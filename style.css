@@ -81,9 +81,8 @@ a {
 
 #topics {
 	margin: 20px 10px;
-	display: flex;
-	flex-direction: row;
-	gap: 4vw;
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
 }
 
 .topic {
@@ -94,6 +93,14 @@ a {
 	flex-direction: column;
 	gap: 15px;
 	width: 20vw;
+	overflow-wrap: break-word;
+}
+
+.sub {
+	margin-top: auto;
+}
+.opentopic {
+	margin-top: auto;
 }
 
 ::file-selector-button {
