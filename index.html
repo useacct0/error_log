@@ -70,13 +70,13 @@
 					const key = topicdataSplit[0];
 					const value = topicdataSplit[1];
 					
+				<!-- We add topics to frontend here -->
 					let topic = document.createElement("div");
 					topic.classList.add("topic");
 					topic.innerHTML = "<h2>"+key+"</h2><br><p class='sub'>"+value+"</p><button id='"+key+"' class='btn opentopic'>Open Topic</btn>";
 					table.appendChild(topic);
 				};
 			
-				<!-- We add topics to frontend here -->
 			} catch (error) {
 				console.error("Error reading the file! Or error choosing a directory.", error);
 			}

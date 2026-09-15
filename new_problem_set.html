@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		
+		<title>Error Log</title>
+		<link rel="stylesheet" href="style.css">
+	</head>
+	<body>
+		<header>
+			<nav class="navbar">
+				<ul>
+					<a href="./index.html"<li>Error Log</li></a>
+					<a href="./add_topic.html"<li>Add Topic</li></a>
+				</ul>
+			</nav>
+			<h1 class="heading" id="heading">Problem Set</h1>
+			<p style="text-align: center">Please reload before (if) loading a new set if you don't like the latter.</p>
+			<p style="text-align: center">After solving the problems below, you may click on <i>Check Answer</i> on the bottom to get all solutions at once.</p>
+			<div class="buttons">
+				<button class="btn" id="load_set">Load Set</button>
+			</div>
+		</header>
+		<main>
+			<div id="setContainer"></div>
+		</main>
+		<footer>&copy; 2026 Divyansh Sharma. All rights reserved.</footer>
+	</body>
+	<script src="indexedDBhelper.js"></script>
+	<script>
+		let directoryHandle;
+		const load_set = document.getElementById("load_set");
+		load_set.addEventListener('click', async () => {
+			try {
+				const urlParams = new URLSearchParams(window.location.search);
+				const topic = urlParams.get('topic');
+				const qn_amt = urlParams.get('qn_amt');
+				
+				directoryHandle = await getDirHandle();
+				
+				const options = {mode: 'read'};
+				if ((await directoryHandle.queryPermission(options)) !== 'granted'){
+					if ((await directoryHandle.requestPermission(options)) !== 'granted'){
+						console.error("Permission denied by user");
+						return;
+					}
+				}
+				
+				let entries = [];
+				let result = [];
+				for await (const entry of directoryHandle.values()){
+					if (entry.kind === "file"){
+						const targetPrefix = `problem_${topic}_`;
+						
+						if (entry.name.startsWith(targetPrefix)){
+							foundmatch = true;
+							entries.push(entry.name);
+						}
+					}
+				}
+				
+				const limit = Math.min(Number(qn_amt, entries.length));
+				
+				for (let i = 0; i < limit; i++) {
+					const randomIndex = Math.floor(Math.random() * entries.length);
+					result.push(entries.splice(randomIndex, 1)[0]);
+				};
+				
+				const container = document.getElementById("setContainer");
+				
+				for await (const entry of directoryHandle.values()){
+					if (entry.kind === "file"){
+						for (const problem of result) {
+							const targetProblem = problem;
+							const targetSolution = "solution_"+problem.split("_")[1]+"_"+problem.split("_")[2]+"_";
+							
+							if (entry.name.startsWith(targetProblem)){
+								let solUrl = "";
+							
+								for await (const entrySol of directoryHandle.values()){
+									if (entrySol.kind === "file"){
+										if (entrySol.name.startsWith(targetSolution)) {
+											const solution = await entrySol.getFile();
+											solUrl = URL.createObjectURL(solution);
+											break;
+										};
+									};
+								};
+								
+								const file = await entry.getFile();
+								const imageUrl = URL.createObjectURL(file);
+		
+								
+								const probContainer = document.createElement('div');
+								probContainer.classList.add('prob-container');
+								probContainer.id = entry.name+'container';
+								probContainer.innerHTML = "<h3>Problem: </h3>";
+								container.appendChild(probContainer);
+								
+								const imgElement = document.createElement('img');
+								imgElement.classList.add('prob-img');
+								imgElement.src = imageUrl;
+								imgElement.style.maxWidth = '300px';
+								imgElement.title = entry.name;
+								probContainer.appendChild(imgElement);
+								
+								const solImg = document.createElement('img');
+								solImg.classList.add('sol-img');
+								solImg.id = entry.name+"sol";
+								solImg.src = solUrl;
+								solImg.style.maxWidth = '300px';
+								solImg.title = entry.name+"solution";
+								solImg.style.display = "none";
+								solImg.style.margin = "10px 0";
+								probContainer.appendChild(solImg);
+							}
+						}
+					}
+				}
+				
+				const checkAnswerBtn = document.createElement('button');
+				checkAnswerBtn.innerText = "Check Answer";
+				checkAnswerBtn.classList.add('btn');
+				checkAnswerBtn.classList.add('check-answer-btn');
+				checkAnswerBtn.id = 'check-answer-btn';
+				checkAnswerBtn.style.margin = "10px 10px";
+				container.appendChild(checkAnswerBtn);
+				
+			} catch (error) {
+				console.error("Error loading problems.", error);
+			}
+		});
+		
+		document.addEventListener('click', async (event) => {
+			if (event.target.classList.contains('check-answer-btn')){
+				const Target = 'sol-img';
+				const targetImgs = document.getElementsByClassName(Target);
+				for (let image of targetImgs) {
+					image.style.display = "block";
+				}
+			};
+		});
+	</script>
+</html>
