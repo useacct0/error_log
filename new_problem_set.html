@@ -60,73 +60,80 @@
 					}
 				}
 				
-				const limit = Math.min(Number(qn_amt, entries.length));
-				
-				for (let i = 0; i < limit; i++) {
-					const randomIndex = Math.floor(Math.random() * entries.length);
-					result.push(entries.splice(randomIndex, 1)[0]);
+				if (await Number(qn_amt) > entries.length) {
+					alert("Broton!! Are you dumb?!");
+					return;
 				};
 				
-				const container = document.getElementById("setContainer");
+				if (entries.length != 0) {
+					
+					const limit = Math.min(Number(qn_amt, entries.length));
+					
+					for (let i = 0; i < limit; i++) {
+						const randomIndex = Math.floor(Math.random() * entries.length);
+						result.push(entries.splice(randomIndex, 1)[0]);
+					};
 				
-				for await (const entry of directoryHandle.values()){
-					if (entry.kind === "file"){
-						for (const problem of result) {
-							const targetProblem = problem;
-							const targetSolution = "solution_"+problem.split("_")[1]+"_"+problem.split("_")[2]+"_";
-							
-							if (entry.name.startsWith(targetProblem)){
-								let solUrl = "";
-							
-								for await (const entrySol of directoryHandle.values()){
-									if (entrySol.kind === "file"){
-										if (entrySol.name.startsWith(targetSolution)) {
-											const solution = await entrySol.getFile();
-											solUrl = URL.createObjectURL(solution);
-											break;
+					const container = document.getElementById("setContainer");
+				
+					for await (const entry of directoryHandle.values()){
+						if (entry.kind === "file"){
+							for (const problem of result) {
+								const targetProblem = problem;
+								const targetSolution = "solution_"+problem.split("_")[1]+"_"+problem.split("_")[2]+"_";
+								
+								if (entry.name.startsWith(targetProblem)){
+									let solUrl = "";
+								
+									for await (const entrySol of directoryHandle.values()){
+										if (entrySol.kind === "file"){
+											if (entrySol.name.startsWith(targetSolution)) {
+												const solution = await entrySol.getFile();
+												solUrl = URL.createObjectURL(solution);
+												break;
+											};
 										};
 									};
-								};
-								
-								const file = await entry.getFile();
-								const imageUrl = URL.createObjectURL(file);
-		
-								
-								const probContainer = document.createElement('div');
-								probContainer.classList.add('prob-container');
-								probContainer.id = entry.name+'container';
-								probContainer.innerHTML = "<h3>Problem: </h3>";
-								container.appendChild(probContainer);
-								
-								const imgElement = document.createElement('img');
-								imgElement.classList.add('prob-img');
-								imgElement.src = imageUrl;
-								imgElement.style.maxWidth = '300px';
-								imgElement.title = entry.name;
-								probContainer.appendChild(imgElement);
-								
-								const solImg = document.createElement('img');
-								solImg.classList.add('sol-img');
-								solImg.id = entry.name+"sol";
-								solImg.src = solUrl;
-								solImg.style.maxWidth = '300px';
-								solImg.title = entry.name+"solution";
-								solImg.style.display = "none";
-								solImg.style.margin = "10px 0";
-								probContainer.appendChild(solImg);
+									
+									const file = await entry.getFile();
+									const imageUrl = URL.createObjectURL(file);
+			
+									
+									const probContainer = document.createElement('div');
+									probContainer.classList.add('prob-container');
+									probContainer.id = entry.name+'container';
+									probContainer.innerHTML = "<h3>Problem: </h3>";
+									container.appendChild(probContainer);
+									
+									const imgElement = document.createElement('img');
+									imgElement.classList.add('prob-img');
+									imgElement.src = imageUrl;
+									imgElement.style.maxWidth = '300px';
+									imgElement.title = entry.name;
+									probContainer.appendChild(imgElement);
+									
+									const solImg = document.createElement('img');
+									solImg.classList.add('sol-img');
+									solImg.id = entry.name+"sol";
+									solImg.src = solUrl;
+									solImg.style.maxWidth = '300px';
+									solImg.title = entry.name+"solution";
+									solImg.style.display = "none";
+									solImg.style.margin = "10px 0";
+									probContainer.appendChild(solImg);
+								}
 							}
 						}
 					}
+				
+					const checkAnswerBtn = document.createElement('button');
+					checkAnswerBtn.innerText = "Check Answer";
+					checkAnswerBtn.classList.add('btn');
+					checkAnswerBtn.classList.add('check-answer-btn');
+					checkAnswerBtn.id = 'check-answer-btn';
+					checkAnswerBtn.style.margin = "10px 10px";
+					container.appendChild(checkAnswerBtn);
 				}
-				
-				const checkAnswerBtn = document.createElement('button');
-				checkAnswerBtn.innerText = "Check Answer";
-				checkAnswerBtn.classList.add('btn');
-				checkAnswerBtn.classList.add('check-answer-btn');
-				checkAnswerBtn.id = 'check-answer-btn';
-				checkAnswerBtn.style.margin = "10px 10px";
-				container.appendChild(checkAnswerBtn);
-				
 			} catch (error) {
 				console.error("Error loading problems.", error);
 			}
